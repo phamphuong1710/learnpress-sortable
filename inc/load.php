@@ -39,17 +39,7 @@ if ( ! class_exists( 'LP_Addon_Sortable' ) ) {
 			parent::__construct();
 
 			$this->_maybe_upgrade_data();
-			$tool_path = dirname( LP_ADDON_FILL_IN_BLANK_FILE ) . "/inc/admin/class-upgrade-database.php";
-			if ( file_exists( $tool_path ) ) {
-				$this->upgrader = include_once( $tool_path );
-			}
-			add_action( 'learn-press/question/updated-answer-data', array(
-				$this,
-				'update_question_answer_meta'
-			), 10, 3 );
 
-			// delete answer meta before delete question.
-			add_action( 'learn-press/before-clear-question', array( $this, 'clear_question_answer_meta' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_style' ) );
 
 			add_action( 'wp_ajax_htc_new_answer_option', array( $this, 'add_answer_row' ) );
@@ -70,48 +60,6 @@ if ( ! class_exists( 'LP_Addon_Sortable' ) ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'sortable_js' ), 99 );
 		}
 
-		/**
-		 * Update needed answer meta.
-		 *
-		 * @param int   $question_id
-		 * @param int   $answer_id
-		 * @param mixed $answer_data
-		 */
-		public function update_question_answer_meta( $question_id, $answer_id, $answer_data ) {
-			if ( ! empty( $answer_data['blanks'] ) ) {
-				$blanks = $answer_data['blanks'];
-			} else {
-				$blanks = '';
-			}
-
-			if ( is_array( $blanks ) ) {
-				/**
-				 * @var $question LP_Question_Fill_In_Blank
-				 */
-				$question = LP_Question::get_question( $question_id );
-				foreach ( $blanks as $id => $blank ) {
-					$question->_blanks[ $blank['id'] ] = $blank;
-				}
-
-			}
-
-			learn_press_update_question_answer_meta( $answer_id, '_blanks', $blanks );
-
-		}
-
-		/**
-		 * Delete answer meta before delete FIB question.
-		 *
-		 * @param $question_id
-		 */
-		public function clear_question_answer_meta( $question_id ) {
-			$question = LP_Question::get_question( $question_id );
-			$answers  = $question->get_answers();
-
-			foreach ( $answers as $answer_id ) {
-				learn_press_delete_question_answer_meta( $answer_id, '_blanks', '', true );
-			}
-		}
 
 		protected function _get_questions() {
 			global $wpdb;

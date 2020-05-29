@@ -13,7 +13,6 @@ $question_id = get_the_ID();
 <script type="text/x-template" id="tmpl-lp-sortable-question-answer">
 
 	<div id="lp-admin-question-editor" class="admin-quiz-sortable-question-editor">
-		<?php //learn_press_sortable_admin_view( 'answer-editor' ); ?>
 			<div class="lp-box-data-content admin-sortable-question-editor">
 				<div class="learn-press-question quiz-question-data">
 					<div class="description lp-list-questions">

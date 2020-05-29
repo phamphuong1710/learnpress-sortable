@@ -61,15 +61,4 @@
         }
     }
 
-    $(document).ready(function () {
-        $('#do-upgrade-sortable').on('click', function () {
-            var $button = $(this).prop('disabled', true).addClass('ajaxloading');
-            FIB.doUpgrade(function () {
-                $button.prop('disabled', false).removeClass('ajaxloading');
-            });
-        });
-
-
-    })
-
 })(jQuery);

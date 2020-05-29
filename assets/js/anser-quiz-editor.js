@@ -4,33 +4,6 @@
 	$( window ).on(
 		'load',
 		function() {
-			// $(".loader_boostify").delay(0).fadeOut("slow");
-			// $("#overlayer").delay(0).fadeOut("slow");
-			// var sortable = $( '.question-item.sortable' );
-			// var tbody = sortable.find( '.ui-sortable' );
-			// sortable.each( function( index ) {
-			// 	var item       = $(this);
-			// 	var questionId = item.attr( 'data-item-id' );
-			// 	var tbody = item.find( '.ui-sortable' );
-			// 	console.log( tbody );
-			// 	var data       = {
-			// 		action: 'htc_all_answer_option',
-			// 		_ajax_nonce: admin.nonce,
-			// 		question_id: questionId,
-			// 	};
-			// 	$.ajax(
-			// 		{
-			// 			type: 'GET',
-			// 			url: admin.url,
-			// 			data: data,
-			// 			beforeSend: function (response) {
-			// 			},
-			// 			success: function (response) {
-			// 				tbody.html( response );
-			// 			},
-			// 		}
-			// 	);
-			// } );
 
 			var sortItem = $( document ).find( 'tbody.ui-sortable' );
 			$( 'body tbody.ui-sortable' ).sortable(
@@ -66,8 +39,11 @@
 									beforeSend: function (response) {
 									},
 									success: function (response) {
-										
 									},
+									error: function(e){
+										alert( 'Something went wrong, Please try again later!' );
+										console.log(e);
+									}
 								}
 							);
 						} );
@@ -94,6 +70,7 @@
 			var table = editer.find( 'tbody' );
 			var number = table.find('tr').length;
 			var n = parseInt(number) + 1;
+			var id = randomString( 8, 'aA');
 			console.log( questionId );
 			var data     = {
 				action: 'htc_new_answer_option',
@@ -107,13 +84,37 @@
 					url: admin.url,
 					data: data,
 					beforeSend: function (response) {
-						console.log( response );
-						
-
+						var tr ='<tr class="answer-option-loading" data-loading= ' + id + '>' +
+									'<td class="sort lp-sortable-handle"></td>'+
+									'<td class="order">' + n + '</td>' +
+									'<td class="answer-text">' +
+										'<form>' +
+											'<input type="text" value="New answers" class="label" readonly>' +
+										'</form>' +
+									'</td>' +
+									'<td class="answer-text">' +
+										'<input type="text" value="Sort label" class="sort-answer" readonly>' +
+									'</td>' +
+									'<td class="actions lp-toolbar-buttons">' +
+										'<div class="lp-toolbar-btn lp-btn-remove remove-answer">' +
+											'<a class="lp-btn-icon dashicons dashicons-trash"></a>' +
+										'</div>' +
+									'</td>' +
+								'</tr>';
+						table.append( tr );
 					},
 					success: function (response) {
+						var loadingItem = table.find( '.answer-option-loading' );
+						var loadingId = loadingItem.attr( 'data-loading' );
+						if ( loadingId == id ) {
+							loadingItem.remove();
+						}
 						table.append( response );
 					},
+					error: function(e){
+						alert( 'Something went wrong, Please try again later!' );
+						console.log(e);
+					}
 				}
 			);
 		}
@@ -123,7 +124,6 @@
 		'click',
 		'.admin-sortable-question-editor .remove-answer',
 		function(e) {
-			alert('msg');
 			var btn = $(this);
 			var question = btn.parents( '.question-item' );
 			var questionId = question.attr( 'data-item-id' );
@@ -145,22 +145,26 @@
 				answer_id: answerId,
 				question_id: questionId,
 			};
+
 			$.ajax(
 				{
 					type: 'POST',
 					url: admin.url,
 					data: data,
 					beforeSend: function (response) {
-						sort.addClass('delete');
+						answer.addClass('answer-option-loading');
 					},
 					success: function (response) {
-						sort.removeClass('delete');
 						answer.remove();
 						var tr = question.find('tbody.ui-sortable').find('tr');
 						tr.each( function( index ) {
 							$(this).find('.order').html( index + 1 );
 						} )
 					},
+					error: function(e){
+						alert( 'Something went wrong, Please try again later!' );
+						console.log(e);
+					}
 				}
 			);
 		}
@@ -200,12 +204,24 @@
 					},
 					success: function (response) {
 					},
+					error: function(e){
+						alert( 'Something went wrong, Please try again later!' );
+						console.log(e);
+					}
 				}
 			);
 		}
 	);
 
-
-
+	function randomString(length, chars) {
+		var mask = '';
+		if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
+		if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		if (chars.indexOf('#') > -1) mask += '0123456789';
+		if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
+		var result = '';
+		for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
+		return result;
+	}
 
 } )( jQuery );

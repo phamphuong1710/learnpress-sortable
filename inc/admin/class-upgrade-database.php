@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Class LP_FIB_Upgrade
+ * Class LP_Sorable_Upgrade
  */
-class LP_FIB_Upgrade {
+class LP_Sorable_Upgrade {
 	/**
-	 * LP_FIB_Upgrade constructor.
+	 * LP_Sorable_Upgrade constructor.
 	 */
 	public function __construct() {
 		add_filter( 'learn-press/admin/tools-tabs', array( $this, 'admin_tab' ) );
@@ -170,4 +170,4 @@ class LP_FIB_Upgrade {
 	}
 }
 
-return new LP_FIB_Upgrade();
+return new LP_Sorable_Upgrade();

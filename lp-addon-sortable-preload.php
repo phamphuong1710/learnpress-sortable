@@ -4,7 +4,7 @@ Plugin Name: LearnPress - Sortable Question
 Plugin URI: http://thimpress.com/learnpress
 Description: Supports type of question Sortable lets user fill out the text into one ( or more than one ) space.
 Author: HTCMage
-Version: 1.0.0
+Version: 1.0.1
 Author URI: http://thimpress.com
 Tags: learnpress, lms, add-on, fill-in-blank
 Text Domain: htc-sortable
@@ -15,7 +15,7 @@ Domain Path: /languages/
 defined( 'ABSPATH' ) || exit;
 
 define( 'LP_ADDON_SORTABLE_FILE', __FILE__ );
-define( 'LP_ADDON_SORTABLE_VER', '1.0.0' );
+define( 'LP_ADDON_SORTABLE_VER', '1.0.1' );
 define( 'LP_ADDON_SORTABLE_REQUIRE_VER', '1.0.0' );
 define( 'LP_QUESTION_SORTABLE_VER', '1.0.0' );
 define( 'LP_ADDON_SORTABLE_URL', plugin_dir_path( __FILE__ ) );

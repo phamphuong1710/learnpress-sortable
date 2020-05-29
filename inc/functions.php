@@ -114,12 +114,16 @@ add_filter( 'learn-press/admin-localize-quiz-editor', 'learn_press_sortable_admi
 
 function htc_sortable_get_answer_by_question( $question_id ) {
 	global $wpdb;
+	$lable = '';
+	$sort = '';
 	$list_answer = $wpdb->get_results( "SELECT * FROM $wpdb->learnpress_question_answers  WHERE question_id = " . $question_id . " ORDER BY answer_order ASC" );
 	foreach ( $list_answer as $answer ) {
 		$data = unserialize( $answer->answer_data );
 		if ( ! empty( $data ) ) {
 			$lable = $data['text'];
-			$sort = $data['sort'];
+			if ( array_key_exists( 'sort', $data) ) {
+				$sort = $data['sort'];
+			}
 		}
 
 		?>

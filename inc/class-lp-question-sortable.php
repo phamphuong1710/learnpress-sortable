@@ -54,18 +54,10 @@ if ( ! class_exists( 'LP_Question_Sortable' ) ) {
 
 			# make sure that shortcode is not exists before add it
 
-			if(shortcode_exists('sortable')){
-				remove_shortcode('sortable');
-			}
-			if ( ! shortcode_exists( 'sortable' ) ) {
-				add_shortcode( 'sortable', array( $this, 'add_shortcode' ) );
-			}
-
 			if ( $answers = $this->get_answers() ) {
 				foreach ( $answers as $k => $answer ) {
 					$list_sort[] = $answer->get_value();
 					$this->_sorts[ $k ] = $answer->get_value();
-
 				}
 			}
 
@@ -100,60 +92,6 @@ if ( ! class_exists( 'LP_Question_Sortable' ) ) {
 		}
 
 		/**
-		 * Get passage.
-		 *
-		 * @param bool $checked
-		 *
-		 * @return mixed|null|string|string[]
-		 */
-		public function get_passage( $checked = false ) {
-			$passage = $this->get_data( 'answer_options' );
-			if ( $checked ) {
-				$pattern = $this->get_wp_shortcode_regex();
-				$passage = preg_replace_callback( $pattern, array( $this, '_replace_callback' ), $passage );
-			}
-			global $wp_filter;
-
-			if ( ! empty( $wp_filter['wpautop'] ) ) {
-				$wpautop = $wp_filter['wpautop'];
-				unset( $wp_filter['wpautop'] );
-			}
-			$passage = do_shortcode( $passage );
-
-			if ( isset( $wpautop ) ) {
-				$wp_filter['wpautop'] = $wpautop;
-			}
-
-			return preg_replace( '!^<p>|<\/p>$!', '', $passage );
-		}
-
-		/**
-		 * Replace callback.
-		 *
-		 * @param $a
-		 *
-		 * @return string
-		 */
-		public function _replace_callback( $a ) {
-			$user_fill = '';
-
-			$attr = shortcode_parse_atts( $a[3] );
-
-			if ( ! empty( $this->user_answered ) && array_key_exists( 'fill', $attr ) ) {
-				settype( $this->user_answered, 'array' );
-				$input_name = $this->get_input_name( $attr['fill'] );
-				if ( ! empty( $this->user_answered[ $input_name ] ) ) {
-					settype( $this->user_answered[ $input_name ], 'array' );
-					$user_fill = array_shift( $this->user_answered[ $input_name ] );
-				}
-			}
-
-			$atts = shortcode_parse_atts( $a[3] );
-
-			return "[sortable " . $a[3] . ' correct_fill="' . $atts['fill'] . '" user_fill="' . $user_fill . '"]';
-		}
-
-		/**
 		 * Get Fill in blank default answers.
 		 *
 		 * @return array|bool|string
@@ -179,69 +117,6 @@ if ( ! class_exists( 'LP_Question_Sortable' ) ) {
 			learn_press_sortable_get_template( 'answer.php', array( 'question' => $this ) );
 		}
 
-		protected function get_blank_data() {
-
-		}
-
-		/**
-		 * Add fill in blank question shortcode.
-		 *
-		 * @param null $atts
-		 *
-		 * @return string
-		 */
-		public function add_shortcode( $atts = null ) {
-			$quiz 	= LP_Global::course_item_quiz();
-			$current_question_id = $quiz->get_viewing_question( 'id' );
-			$question = learn_press_get_question($current_question_id);
-			$answered = $question->get_answered();
-			if ( false === ( $checked = $question->_get_checked( $answered ) ) ) {
-				$checked = $question->check( $answered );
-			}
-			
-			$atts = shortcode_atts(
-				array(
-					'fill'      => '',
-					'uid'       => '',
-					'id'        => '',
-					'user_fill' => '',
-					'correct'   => ''
-				), $atts
-			);
-
-			$uid = $atts['id'];
-			if ( ! empty( $answered[ $uid ] ) ) {
-				$atts['user_fill'] = $answered[ $uid ];
-				if ( ! empty( $checked['sort'][ $uid ] ) ) {
-					$atts['correct'] = $checked['sort'][ $uid ];
-				} else {
-
-				}
-			}
-			ob_start();
-
-			global $wp_filter;
-
-			if ( ! empty( $wp_filter['wpautop'] ) ) {
-				$wpautop = $wp_filter['wpautop'];
-				unset( $wp_filter['wpautop'] );
-			}
-
-			learn_press_sortable_get_template(
-				'blank.php',
-				array(
-					'question' => $question,
-					'answer'   => $question->_answer,
-					'blank'    => array_merge( $question->_sorts[ $atts['id'] ], $atts )
-				)
-			);
-
-			if ( isset( $wpautop ) ) {
-				$wp_filter['wpautop'] = $wpautop;
-			}
-
-			return ob_get_clean();
-		}
 
 		/**
 		 * Get input name.
@@ -295,10 +170,13 @@ if ( ! class_exists( 'LP_Question_Sortable' ) ) {
 						$sort = $sorts[ (int) $option['answer_order'] - 1 ];
 						if ( ( $option['sort'] == $answered[$option['answer_order']] ) ) {
 							$correct[] = true;
-							$return['mark'] += $point_per_blank;
+							$return['mark'] += 1;
+
 						} else {
 							$correct[] = false;
 						}
+
+						$this->_set_checked( $return, $user_answer );//
 					}
 					if ( in_array( false, $correct) ) {
 						$return['correct'] = false;
@@ -322,13 +200,39 @@ if ( ! class_exists( 'LP_Question_Sortable' ) ) {
 			return $return;
 		}
 
+
 		/**
-		 * Get Wordpress shortcode regex.
+		 * Do something before get data.
+		 * Some data now is not auto loading when object is created
+		 * therefore, we will load it here.
 		 *
-		 * @return string
+		 * @param string $name
+		 * @param string $default
+		 *
+		 * @return array|mixed
 		 */
-		public function get_wp_shortcode_regex() {
-			return '/' . get_shortcode_regex( array( 'sortable' ) ) . '/';
+		public function get_data( $name = '', $default = '' ) {
+			switch ( $name ) {
+				case 'answer_options':
+					$answer_options = parent::get_data( $name, $default );
+
+					if ( ! $answer_options ) {
+						$answer_options = $this->_curd->load_answer_options( $this->get_id() );
+						$this->set_data( $name, $answer_options );
+					}
+
+					break;
+				case 'mark':
+					$answers = $this->get_answers();
+					$count = 0;
+					foreach ( $answers as $key => $option ) {
+						$count++;
+					}
+					$this->set_data( $name, $count );
+					break;
+			}
+
+			return parent::get_data( $name, $default );
 		}
 
 	}

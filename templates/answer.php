@@ -29,15 +29,7 @@ foreach ( $answers as $key => $answer ) {
 }
 $class = '';
 
-
-
 shuffle( $list_sort );
-// // die();
-// // echo $answer->get_title( 'display' );
-// echo "<pre>";
-// // var_dump( $question->get_answered() );
-// var_dump( $list_sort );
-// echo "</pre>";
 
 $answered = $question->get_answered();
 
@@ -79,7 +71,6 @@ $answered = $question->get_answered();
 							$class = 'incorrect';
 						}
 					}
-
 					?>
 					<div class="item-option-ans <?php echo esc_attr( $class ); ?>">
 						<div class="option-answer">
@@ -112,7 +103,6 @@ $answered = $question->get_answered();
 
 							<?php } else { ?>
 							<div class="sortable-ui-value htc-data--blank blank--sort">
-								
 							</div>
 								<input type="hidden" name="learn-press-question-<?php echo $question->get_id(); ?>[<?php echo $answer['answer_order']; ?>]"
 									value=""

@@ -18,8 +18,7 @@
         <td class="answer-text">
 
              <input type="text" :value="answer.sort"
-                   :name="name"
-                   @change="changeCorrect">
+                    class="sort-answer">
         </td>
         <td class="actions lp-toolbar-buttons">
             <div class="lp-toolbar-btn lp-btn-remove remove-answer" v-if="deletable">

@@ -16,6 +16,7 @@
         $( ".htc-data--blank, .htc-data--answer" ).sortable({
             cursor: "move",
             connectWith: ".htc-data--blank:not(:has(span)), .htc-data--answer",//.sortable-ui-value
+            placeholder: 'htc-sortable-placeholder',
             stop: function( event, ui ) {
                 
                 var answers = $(this);
